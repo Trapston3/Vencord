@@ -6,10 +6,16 @@ const { WebSocketServer } = require("ws");
 const PORT = 6969;
 const pressedKeys = new Set();
 const ToggleBindings = new Map([
+    [61010, "TOGGLE_MUTE"],
     [UiohookKey.Insert, "TOGGLE_MUTE"],
+    [3666, "TOGGLE_MUTE"],
     [UiohookKey.Numpad0, "TOGGLE_MUTE"],
+    [82, "TOGGLE_MUTE"],
+    [60999, "TOGGLE_DEAFEN"],
     [UiohookKey.Home, "TOGGLE_DEAFEN"],
-    [UiohookKey.Numpad7, "TOGGLE_DEAFEN"]
+    [3655, "TOGGLE_DEAFEN"],
+    [UiohookKey.Numpad7, "TOGGLE_DEAFEN"],
+    [71, "TOGGLE_DEAFEN"]
 ]);
 
 const wss = new WebSocketServer({ host: "127.0.0.1", port: PORT });
