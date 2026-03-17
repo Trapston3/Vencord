@@ -133,15 +133,14 @@ export default definePlugin({
         clearReconnectTimer();
         bridgeSocket?.close();
         bridgeSocket = null;
+        connectBridge();
 
         if (!Native) {
             showToast("CustomKeybinds companion server auto-start is only available on desktop.", Toasts.Type.FAILURE);
             return;
         }
 
-        void Native.startCompanionServer().then(() => {
-            connectBridge();
-        }).catch(error => {
+        void Native.startCompanionServer().catch(error => {
             logger.error("Failed to start companion bridge:", error);
             showToast(
                 error instanceof Error ? error.message : "Failed to start the CustomKeybinds companion server.",
