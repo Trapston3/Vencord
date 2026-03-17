@@ -6,20 +6,17 @@
 
 import { Logger } from "@utils/Logger";
 import definePlugin, { PluginNative } from "@utils/types";
-import { findByProps } from "@webpack";
 import { FluxDispatcher, showToast, Toasts } from "@webpack/common";
 
 import type * as NativeModule from "./native";
 
 type BridgeAction = "TOGGLE_MUTE" | "TOGGLE_DEAFEN";
-type SoundPlayer = { playSound: (sound: string, volume?: number) => void; };
 type BridgeMessage = { action?: unknown; };
 
 const logger = new Logger("CustomKeybinds");
 const Native = IS_DISCORD_DESKTOP || IS_VESKTOP
     ? VencordNative.pluginHelpers.CustomKeybinds as PluginNative<typeof NativeModule>
     : null;
-const SoundModule = findByProps("playSound") as Partial<SoundPlayer> | undefined;
 const BridgeUrl = "ws://localhost:6969";
 const ReconnectDelay = 1000;
 
@@ -27,26 +24,12 @@ let bridgeSocket: WebSocket | null = null;
 let reconnectTimer: number | null = null;
 let shouldReconnect = false;
 
-function getSoundPlayer(): SoundPlayer {
-    const playSound = SoundModule?.playSound;
-
-    if (typeof playSound !== "function") {
-        throw new Error("CustomKeybinds could not find the Discord sound player module.");
-    }
-
-    return { playSound };
-}
-
 function handleToggle(action: BridgeAction) {
-    const soundPlayer = getSoundPlayer();
-
     FluxDispatcher.dispatch({
         type: action === "TOGGLE_MUTE"
             ? "AUDIO_TOGGLE_SELF_MUTE"
             : "AUDIO_TOGGLE_SELF_DEAF"
     });
-
-    soundPlayer.playSound(action === "TOGGLE_MUTE" ? "mute" : "deafen", 0.5);
 }
 
 function onBridgeMessage(event: MessageEvent) {
@@ -121,14 +104,6 @@ export default definePlugin({
     description: "Receives true global mute and deafen toggles from the companion bridge",
     authors: [{ name: "Jules", id: 0n }],
     start() {
-        try {
-            getSoundPlayer();
-        } catch (error) {
-            logger.error("Failed to initialize CustomKeybinds:", error);
-            showToast(error instanceof Error ? error.message : "Failed to initialize CustomKeybinds.", Toasts.Type.FAILURE);
-            return;
-        }
-
         shouldReconnect = true;
         clearReconnectTimer();
         bridgeSocket?.close();
